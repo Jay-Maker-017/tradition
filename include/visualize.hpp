@@ -15,3 +15,10 @@ void drawLightbars(cv::Mat &img, const std::vector<Lightbar> &lightbars,
 
 // 绘制已配对的装甲板
 void drawArmors(cv::Mat &img, const std::vector<Armor> &armors);
+
+// 生成带灯条和装甲板标注的画面。
+cv::Mat makeAnnotatedFrame(const cv::Mat &frame,
+                           const std::vector<Armor> &armors);
+
+// 将画面宽度缩放到适合窗口显示的范围。
+cv::Mat resizeForDisplay(const cv::Mat &image);

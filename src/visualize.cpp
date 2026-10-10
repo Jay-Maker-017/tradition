@@ -5,6 +5,12 @@
 
 // 可视化模块
 
+namespace
+{
+// 是否绘制灯条红蓝矩形框；绿色中心点不受此开关影响。
+constexpr bool kDrawLightbarRects = false;
+} // namespace
+
 void drawLightbars(cv::Mat &img, const std::vector<Lightbar> &lightbars,
                    bool draw_rects)
 {
@@ -81,4 +87,39 @@ void drawArmors(cv::Mat &img, const std::vector<Armor> &armors)
         const cv::Scalar text_color(0, 255, 255);
         cv::putText(img, label, org, cv::FONT_HERSHEY_SIMPLEX, 0.6, text_color, 2, cv::LINE_AA);
     }
+}
+
+cv::Mat makeAnnotatedFrame(const cv::Mat &frame,
+                           const std::vector<Armor> &armors)
+{
+    cv::Mat result = frame.clone();
+
+    // 只有配对成功且识别出类型的装甲板，其灯条才绘制中心绿点。
+    std::vector<Lightbar> confirmed_bars;
+    confirmed_bars.reserve(armors.size() * 2);
+    for (const Armor &armor : armors)
+    {
+        if (!armor.has_type)
+            continue;
+        confirmed_bars.push_back(armor.left);
+        confirmed_bars.push_back(armor.right);
+    }
+
+    drawLightbars(result, confirmed_bars, kDrawLightbarRects);
+    drawArmors(result, armors);
+    return result;
+}
+
+cv::Mat resizeForDisplay(const cv::Mat &image)
+{
+    constexpr int min_display_width = 460;
+    constexpr int max_display_width = 1280;
+    cv::Mat display = image;
+    if (display.cols < min_display_width || display.cols > max_display_width)
+    {
+        const int target_width = std::clamp(display.cols, min_display_width, max_display_width);
+        const double scale = static_cast<double>(target_width) / display.cols;
+        cv::resize(image, display, cv::Size(), scale, scale);
+    }
+    return display;
 }

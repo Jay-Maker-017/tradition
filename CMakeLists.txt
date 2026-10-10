@@ -31,13 +31,15 @@ endif()
 add_subdirectory(NNdeployment)
 
 
-# 灯条检测程序：main + 四个算法模块（检测 / 配对 / 数字识别 / 可视化）
+# 灯条检测程序：main 应用编排 + 算法检测、数字识别、报告与可视化模块
 add_executable(main
     src/main.cpp
     src/lightbar.cpp
     src/armor.cpp
     src/digit_recognizer.cpp
-    src/visualize.cpp)
+    src/visualize.cpp
+    src/report.cpp
+    src/pipeline.cpp)
 target_include_directories(main PRIVATE include)
 # NNdeployment 公开接口需要 C++20（GCC 11 及以上支持）
 target_compile_features(main PRIVATE cxx_std_20)
