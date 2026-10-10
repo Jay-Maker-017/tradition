@@ -255,7 +255,7 @@ static void drawArmors(cv::Mat &img,
 
 // 默认图片路径（绝对路径）：不带命令行参数时也能直接运行，不受工作目录影响
 static const std::string kDefaultImagePath =
-    "/home/jay/Desktop/auto_aim_homework/lecture2/img/test_1.jpg";
+    "/home/jay/Desktop/auto_aim_homework/lecture2/img/test_11.png";
 
 
 int main(int argc, char **argv)
