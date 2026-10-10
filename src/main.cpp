@@ -14,7 +14,8 @@
 
 namespace
 {
-// 默认输入与结果输出路径。
+// 默认输入与结果输出路径
+// (之前一直出现找不到文件的错误，很烦，所以干脆用绝对路径了)
 const std::string kDefaultVideoPath =
     "/home/jay/Desktop/auto_aim_homework/tradition/video/video_combat.avi";
 [[maybe_unused]] const std::string kDefaultImagePath =
@@ -24,7 +25,7 @@ const std::string kOutputImagePath =
 const std::string kOutputVideoPath =
     "/home/jay/Desktop/auto_aim_homework/tradition/lightbar_result.avi";
 
-// 数字神经网络模型配置（对应 configs/detect.json 中的节点）。
+// 数字神经网络模型配置
 const std::string kConfigPath =
     "/home/jay/Desktop/auto_aim_homework/tradition/configs/detect.json";
 const std::string kModelFolder =

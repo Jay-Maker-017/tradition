@@ -3,6 +3,9 @@
 #include <exception>
 #include <iostream>
 
+// 负责视频帧流水线的维护
+// 如果神经网络加载故障，自动切回纯传统识别，保证运行
+
 DetectionPipeline::DetectionPipeline(const DigitParams &digit_params)
 {
     try

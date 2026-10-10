@@ -12,12 +12,12 @@ struct Armor
     Lightbar left;
     Lightbar right;
 
-    // ===== 数字神经网络识别结果（由 DigitRecognizer 填充） =====
-    bool has_type = false;  // 网络是否成功识别出该装甲板的类型
+    // 数字神经网络识别结果
+    bool has_type = false;  // 是否成功识别出装甲板类型
     int armor_id = -1;      // 类型 ID：0哨兵 1英雄 2工程 3/4/5号步兵 6前哨站 7基地(底部) 8基地(顶部)
     int color_id = -1;      // 颜色 ID：0蓝 1红 2白 3紫
     double nn_score = 0.;   // 网络置信度
-    std::string class_name; // 类型名称（中文，来自部署库）
+    std::string class_name; // 类型名称
 };
 
 // 配对参数
@@ -63,5 +63,5 @@ std::vector<cv::Point2f> armorCorners(const Lightbar &left, const Lightbar &righ
 // 计算一块装甲板的中心（两灯条中心的中点）
 cv::Point2f armorCenter(const Lightbar &left, const Lightbar &right);
 
-// 类型 ID -> 英文名称（可视化用；OpenCV 的 putText 不支持中文）
+// 类型 ID -> 英文名称
 const char *armorTypeNameEn(int armor_id);

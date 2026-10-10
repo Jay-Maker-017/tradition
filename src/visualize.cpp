@@ -94,7 +94,7 @@ cv::Mat makeAnnotatedFrame(const cv::Mat &frame,
 {
     cv::Mat result = frame.clone();
 
-    // 只有配对成功且识别出类型的装甲板，其灯条才绘制中心绿点。
+    // 只有配对成功且识别出类型的装甲板，其灯条才绘制中心绿点
     std::vector<Lightbar> confirmed_bars;
     confirmed_bars.reserve(armors.size() * 2);
     for (const Armor &armor : armors)

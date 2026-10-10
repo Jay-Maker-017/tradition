@@ -5,6 +5,9 @@
 #include <iomanip>
 #include <iostream>
 
+// 负责控制台（终端）的逐行报告书写
+// 输出单张图片的灯条与装甲板检测情况
+
 void printImageDetails(const std::vector<Lightbar> &lightbars,
                        const std::vector<Armor> &armors,
                        const ArmorMatcher &matcher)
