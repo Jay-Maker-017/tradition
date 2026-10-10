@@ -13,11 +13,11 @@
 
 // 默认图片路径
 static const std::string kDefaultImagePath =
-    "/home/jay/Desktop/auto_aim_homework/lecture2/img/test_1.jpg";
+    "/home/jay/Desktop/auto_aim_homework/tradition/img/test_1.jpg";
 
 // 结果图保存路径
 static const std::string kOutputImagePath =
-    "/home/jay/Desktop/auto_aim_homework/lecture2/lightbar_result.jpg";
+    "/home/jay/Desktop/auto_aim_homework/tradition/lightbar_result.jpg";
 
 //主流程：读图 -> 灯条检测 -> 装甲板配对 -> 可视化
 int main(int argc, char **argv)
