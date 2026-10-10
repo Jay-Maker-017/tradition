@@ -15,6 +15,11 @@
 #include <string>
 #include <vector>
 
+// 是否在最终呈现的画面（窗口显示 + 保存的结果图片/视频）中绘制框选灯条的红蓝矩形。
+// true = 绘制（默认开启）；false = 隐藏。
+// 注意：该开关只控制红蓝矩形框本身，灯条中心的绿色圆点不受影响。
+static constexpr bool kDrawLightbarRects = false;
+
 // 默认视频路径；不带参数时处理 tradition/video 中的测试视频。
 static const std::string kDefaultVideoPath =
     "/home/jay/Desktop/auto_aim_homework/tradition/video/video_combat.avi";
@@ -142,7 +147,7 @@ cv::Mat makeAnnotatedFrame(const cv::Mat &frame,
                            const std::vector<Armor> &armors)
 {
     cv::Mat result = frame.clone();
-    drawLightbars(result, lightbars);
+    drawLightbars(result, lightbars, kDrawLightbarRects);
     drawArmors(result, armors);
     return result;
 }
