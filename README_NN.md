@@ -80,14 +80,17 @@ cmake --build build -j$(nproc)
 ## 4. 运行
 
 ```bash
-./build/main                              # 默认图片 img/test_1.jpg + 默认模型 armor_v8
-./build/main img/test_1.jpg               # 指定图片
-./build/main img/test_1.jpg armor_v5      # 指定模型（armor_v5 / armor_v8）
+./build/main                                      # 默认视频 video/video_combat.avi + armor_v8
+./build/main img/test_1.jpg                       # 指定图片，使用 armor_v8
+./build/main video/video_combat.avi               # 指定 AVI 视频
+./build/main img/test_1.jpg armor_v5              # 指定图片和模型（armor_v5 / armor_v8）
 ```
 
-- 终端会打印每块装甲板的：左右灯条中心、角点、种类（中文）+ 置信度；未匹配到类型的
-  装甲板打印“未识别”。
-- 结果图保存到 `lightbar_result.jpg`：绿框为传统方案装甲板四边形，
+- 程序先尝试将输入按图片读取；读取失败时自动尝试作为视频打开，不使用视频帧数猜测文件类型，因此兼容 PNG/RGBA 图片。
+- 图片输入时，终端打印灯条中心、尺寸、装甲板角点、类型（中文）和置信度；结果图保存到 `lightbar_result.jpg`。
+- 视频输入支持 AVI（OpenCV 后端支持的其他视频格式也可尝试）；模型只初始化一次，然后逐帧检测。终端每帧打印检测摘要，视频结束后打印处理帧数、耗时、平均帧耗时和 FPS。
+- 带图形显示环境时按视频帧率节流播放，按 `q` 或 `Esc` 提前结束；若单帧识别耗时超过帧间隔，则播放速度受实际处理速度限制。无 `DISPLAY` 时跳过窗口并尽快处理完整视频。视频处理结果以 MJPG 编码保存到 `lightbar_result.avi`。
+- 结果图/视频中的绿框为传统方案装甲板四边形，
   **黄色标签为神经网络识别出的类型**（未识别时标签为绿色 `?`）。
 
 ## 5. 新增/修改的文件
@@ -102,9 +105,11 @@ cmake --build build -j$(nproc)
 | `include/armor.hpp` | `Armor` 增加类型字段（has_type / armor_id / color_id / nn_score / class_name） |
 | `src/armor.cpp` | 新增 `armorCenter()` 与 `armorTypeNameEn()`（putText 不能画中文） |
 | `src/visualize.cpp` | 装甲板标签显示类型与置信度 |
-| `src/main.cpp` | 流程集成：检测 → 配对 → 数字识别 → 打印/可视化 |
+| `src/main.cpp` | 图片/视频智能切换；逐帧执行检测、配对、数字识别、打印与可视化 |
+| `video/video_combat.avi` | AVI 测试视频；默认视频输入 |
+| `lightbar_result.avi` | 视频检测结果（运行视频输入后生成） |
 | `CMakeLists.txt` | 集成 NNdeployment 子目录 + OpenVINO 自动探测 |
-| `.vscode/tasks.json` | 构建任务更新为 CMake 流程 |
+| `.vscode/tasks.json` | CMake 构建及运行任务 |
 
 ## 6. 常见参数调整
 
@@ -131,6 +136,11 @@ Armor 1: Blue  left_center=(489, 533)  right_center=(827, 546)  dist=339.2  scor
 $ ./build/main img/test_11.png
 Total armors: 1
   Type: 哨兵  id=0  color_id=0  score=0.923
+
+$ ./build/main video/video_combat.avi
+输入源: 视频 ... (1440x1080, 30 FPS, 531 帧)
+[帧 1/531] lightbars=... armors=...
+视频处理结束：共处理 531 帧，耗时 ... 秒，平均 ... ms/帧（... FPS）。
 ```
 
 ## 8. 参考

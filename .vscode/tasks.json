@@ -39,6 +39,48 @@
             ],
             "group": "build",
             "detail": "集成 NNdeployment 后需用 CMake 构建（main 链接 NNdeployment_lib + OpenVINO）。"
+        },
+        {
+            "type": "shell",
+            "label": "运行: 默认测试视频",
+            "command": "./build/main",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "使用默认输入 tradition/video/video_combat.avi。"
+        },
+        {
+            "type": "shell",
+            "label": "运行: 指定图片或视频",
+            "command": "./build/main",
+            "args": [
+                "${input:inputPath}",
+                "${input:modelKey}"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "输入 workspace 相对路径（如 img/test_1.jpg 或 video/video_combat.avi）及模型节点。"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "inputPath",
+            "type": "promptString",
+            "description": "图片或视频路径（相对 tradition 目录）",
+            "default": "img/test_1.jpg"
+        },
+        {
+            "id": "modelKey",
+            "type": "pickString",
+            "description": "选择数字识别模型",
+            "options": [
+                "armor_v8",
+                "armor_v5"
+            ],
+            "default": "armor_v8"
         }
     ],
     "version": "2.0.0"
