@@ -143,11 +143,23 @@ void printVideoSummary(int frame_index, int total_frames,
 }
 
 cv::Mat makeAnnotatedFrame(const cv::Mat &frame,
-                           const std::vector<Lightbar> &lightbars,
                            const std::vector<Armor> &armors)
 {
     cv::Mat result = frame.clone();
-    drawLightbars(result, lightbars, kDrawLightbarRects);
+
+    // 只有“灯条配对成功且数字网络识别出类型”的装甲板上的两根灯条才画中心绿点：
+    // 未配对成功的灯条、以及所在装甲板未识别出类型的灯条都不再绘制绿点。
+    std::vector<Lightbar> confirmed_bars;
+    confirmed_bars.reserve(armors.size() * 2);
+    for (const Armor &armor : armors)
+    {
+        if (!armor.has_type)
+            continue;
+        confirmed_bars.push_back(armor.left);
+        confirmed_bars.push_back(armor.right);
+    }
+
+    drawLightbars(result, confirmed_bars, kDrawLightbarRects);
     drawArmors(result, armors);
     return result;
 }
@@ -242,7 +254,7 @@ int main(int argc, char **argv)
         processFrame(still_image, detector, matcher, recognizer.get(),
                      digit_recognition_enabled, lightbars, armors);
         printImageDetails(lightbars, armors, matcher);
-        const cv::Mat result = makeAnnotatedFrame(still_image, lightbars, armors);
+        const cv::Mat result = makeAnnotatedFrame(still_image, armors);
         if (!cv::imwrite(kOutputImagePath, result))
         {
             std::cerr << "无法保存结果图片: " << kOutputImagePath << std::endl;
@@ -286,7 +298,7 @@ int main(int argc, char **argv)
         ++processed_frames;
         printVideoSummary(processed_frames, total_frames, lightbars, armors);
 
-        const cv::Mat result = makeAnnotatedFrame(frame, lightbars, armors);
+        const cv::Mat result = makeAnnotatedFrame(frame, armors);
         if (writer.isOpened())
             writer.write(result);
 
