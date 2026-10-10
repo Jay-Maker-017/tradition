@@ -1,0 +1,16 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "default",
+            "displayName": "默认配置",
+            "description": "Unix Makefiles，输出到 build/ 目录（兼容 CMake 3.22）",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
+            }
+        }
+    ]
+}
