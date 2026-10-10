@@ -58,12 +58,21 @@ void drawArmors(cv::Mat &img, const std::vector<Armor> &armors)
         center *= 0.25f;
         cv::circle(img, center, 4, armor_color, cv::FILLED, cv::LINE_AA);
 
-        const std::string label = "Armor " + std::to_string(k + 1);
+        // 标签：编号 + 数字神经网络识别出的类型（识别不到用 ? 占位）
+        std::string label = "Armor " + std::to_string(k + 1) + ": ";
+        if (armors[k].has_type)
+            label += std::string(armorTypeNameEn(armors[k].armor_id)) + " " +
+                     cv::format("%.2f", armors[k].nn_score);
+        else
+            label += "?";
+
         int base_line = 0;
         cv::Size text_size = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.6, 2, &base_line);
         // 文字放在四边形上方水平居中，并保证不超出图像上边界
         cv::Point org(static_cast<int>(center.x - text_size.width / 2.f),
                       std::max(text_size.height + 4, static_cast<int>(top_y) - 8));
-        cv::putText(img, label, org, cv::FONT_HERSHEY_SIMPLEX, 0.6, armor_color, 2, cv::LINE_AA);
+        // 识别到类型时用黄色标注，未识别时用绿色（与装甲板框同色）
+        const cv::Scalar text_color = armors[k].has_type ? cv::Scalar(0, 255, 255) : armor_color;
+        cv::putText(img, label, org, cv::FONT_HERSHEY_SIMPLEX, 0.6, text_color, 2, cv::LINE_AA);
     }
 }

@@ -36,6 +36,11 @@ std::vector<cv::Point2f> armorCorners(const Lightbar &left, const Lightbar &righ
     return {lt, rt, rb, lb}; // 左上 -> 右上 -> 右下 -> 左下
 }
 
+cv::Point2f armorCenter(const Lightbar &left, const Lightbar &right)
+{
+    return 0.5f * (left.center + right.center);
+}
+
 float ArmorMatcher::pairScore(const Lightbar &a, const Lightbar &b) const
 {
     // 判据 1：颜色一致
@@ -124,4 +129,16 @@ std::vector<Armor> ArmorMatcher::match(const std::vector<Lightbar> &bars) const
                0.5f * (b.left.center.x + b.right.center.x);
     });
     return armors;
+}
+
+// 类型 ID 与名称的对应关系与 26_Detection_Models-main 模型的 Class ID 定义一致
+const char *armorTypeNameEn(int armor_id)
+{
+    static const char *kNames[] = {
+        "Sentry", "Hero", "Engineer", "Infantry3", "Infantry4",
+        "Infantry5", "Outpost", "Base_Bottom", "Base_Top"};
+    const int count = static_cast<int>(sizeof(kNames) / sizeof(kNames[0]));
+    if (armor_id < 0 || armor_id >= count)
+        return "Unknown";
+    return kNames[armor_id];
 }

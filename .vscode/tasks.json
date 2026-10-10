@@ -6,9 +6,10 @@
             "command": "/usr/bin/g++",
             "args": [
                 "-fdiagnostics-color=always",
-                "-std=c++17",
+                "-std=c++20",
                 "-I/usr/include/opencv4",
                 "-I${workspaceFolder}/include",
+                "-I${workspaceFolder}/NNdeployment/interface",
                 "-g",
                 "${file}",
                 "-o",
@@ -28,8 +29,8 @@
         },
         {
             "type": "shell",
-            "label": "C/C++: 编译 main（全部源文件）",
-            "command": "g++ -std=c++17 -g -fdiagnostics-color=always src/main.cpp src/lightbar.cpp src/armor.cpp src/visualize.cpp -o build/main -Iinclude $(pkg-config --cflags --libs opencv4)",
+            "label": "CMake: 配置并构建 main",
+            "command": "cmake -S . -B build && cmake --build build -j$(nproc)",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -37,7 +38,7 @@
                 "$gcc"
             ],
             "group": "build",
-            "detail": "拆分多文件后需一起编译（等价于 CMake 目标 main）。"
+            "detail": "集成 NNdeployment 后需用 CMake 构建（main 链接 NNdeployment_lib + OpenVINO）。"
         }
     ],
     "version": "2.0.0"

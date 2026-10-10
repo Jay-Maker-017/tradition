@@ -1,4 +1,5 @@
 #include "armor.hpp"
+#include "digit_recognizer.hpp"
 #include "lightbar.hpp"
 #include "visualize.hpp"
 
@@ -19,13 +20,22 @@ static const std::string kDefaultImagePath =
 static const std::string kOutputImagePath =
     "/home/jay/Desktop/auto_aim_homework/tradition/lightbar_result.jpg";
 
-//主流程：读图 -> 灯条检测 -> 装甲板配对 -> 可视化
+// 数字神经网络模型配置（对应 configs/detect.json 中的节点）
+static const std::string kConfigPath =
+    "/home/jay/Desktop/auto_aim_homework/tradition/configs/detect.json";
+static const std::string kModelFolder =
+    "/home/jay/Desktop/auto_aim_homework/tradition/models/openvino";
+static const std::string kDefaultModelKey = "armor_v8"; // 也可选 armor_v5
+
+//主流程：读图 -> 灯条检测 -> 装甲板配对 -> 数字神经网络类型识别 -> 可视化
 int main(int argc, char **argv)
 {
     // 读图 (没传参数就用默认绝对路径)
     std::string inPath = (argc >= 2) ? std::string(argv[1]) : kDefaultImagePath;
+    // 可选第二个参数：模型节点名（armor_v5 / armor_v8）
+    const std::string modelKey = (argc >= 3) ? std::string(argv[2]) : kDefaultModelKey;
     std::cout << "Input image path: " << inPath << std::endl;
-    std::cout << "Usage: " << argv[0] << " [input_image]  (默认使用 " << kDefaultImagePath << ")" << std::endl;
+    std::cout << "Usage: " << argv[0] << " [input_image] [armor_v5|armor_v8]  (默认使用 " << kDefaultImagePath << ")" << std::endl;
 
     // 读取图片
     cv::Mat bgr_img = cv::imread(inPath, cv::IMREAD_COLOR);
@@ -59,7 +69,29 @@ int main(int argc, char **argv)
     // 装甲板配对
     // 实现思路：对灯条两两打分（颜色,长度,间距,平行/垂直），按得分从优到劣贪心配对，保证每根灯条最多只属于一块装甲板
     const ArmorMatcher matcher;
-    const std::vector<Armor> armors = matcher.match(lightbars);
+    std::vector<Armor> armors = matcher.match(lightbars);
+
+    // ==================== 数字神经网络识别装甲板类型 ====================
+    // 思路参考 26_Detection_Models-main：用 NNdeployment 的 ArmorModel 对整帧图像做一次
+    // 推理，再按中心距把网络识别出的类型（数字/类别）匹配给传统方法检测出的装甲板
+    std::cout << "Digit model: " << modelKey << "  (" << kConfigPath << ")" << std::endl;
+    try
+    {
+        const DigitParams digit_params{
+            kConfigPath,  // 模型配置 json
+            modelKey,     // json 内的模型节点名
+            kModelFolder, // 模型文件夹
+            2,            // my_color=2：离线演示保留蓝红双方结果
+            0.5f,         // 匹配阈值：中心距 <= 0.5 倍装甲板宽度
+        };
+        DigitRecognizer recognizer(digit_params);
+        recognizer.recognize(bgr_img, armors); // 原地为每块装甲板补充类型
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "[警告] 数字识别模型加载/推理失败: " << e.what() << std::endl;
+        std::cerr << "[警告] 已跳过神经网络类型识别，仅输出传统方案结果。" << std::endl;
+    }
 
     std::cout << "Total armors: " << armors.size() << std::endl;
     for (size_t k = 0; k < armors.size(); ++k)
@@ -86,6 +118,19 @@ int main(int argc, char **argv)
                   << " RB=(" << static_cast<int>(corners[2].x) << "," << static_cast<int>(corners[2].y) << ")"
                   << " LB=(" << static_cast<int>(corners[3].x) << "," << static_cast<int>(corners[3].y) << ")"
                   << std::endl;
+
+        // 打印数字神经网络识别出的类型（数字）
+        if (armors[k].has_type)
+        {
+            std::cout << "  Type: " << armors[k].class_name << "  id=" << armors[k].armor_id
+                      << "  color_id=" << armors[k].color_id
+                      << "  score=" << std::fixed << std::setprecision(3) << armors[k].nn_score
+                      << std::defaultfloat << std::setprecision(6) << std::endl;
+        }
+        else
+        {
+            std::cout << "  Type: 未识别（网络未匹配到该装甲板）" << std::endl;
+        }
     }
     std::cout << "Total lightbars: " << lightbars.size() << std::endl;
 
