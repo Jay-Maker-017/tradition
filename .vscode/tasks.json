@@ -29,7 +29,7 @@
         {
             "type": "shell",
             "label": "C/C++: 编译 lightbar_detection（全部源文件）",
-            "command": "g++ -std=c++17 -g -fdiagnostics-color=always src/lightbar_detection..cpp src/lightbar.cpp src/armor.cpp src/visualize.cpp -o build/lightbar_detection -Iinclude $(pkg-config --cflags --libs opencv4)",
+            "command": "g++ -std=c++17 -g -fdiagnostics-color=always src/main.cpp src/lightbar.cpp src/armor.cpp src/visualize.cpp -o build/lightbar_detection -Iinclude $(pkg-config --cflags --libs opencv4)",
             "options": {
                 "cwd": "${workspaceFolder}"
             },

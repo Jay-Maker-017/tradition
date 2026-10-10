@@ -12,7 +12,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 # 灯条检测程序：main + 三个算法模块（检测 / 配对 / 可视化）
 add_executable(lightbar_detection
-    src/lightbar_detection..cpp
+    src/main.cpp
     src/lightbar.cpp
     src/armor.cpp
     src/visualize.cpp)
