@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-// ==================== 灯条检测模块实现 ====================
+// 灯条检测模块
 
 std::vector<Lightbar> LightbarDetector::detect(const cv::Mat &bgr_img) const
 {
@@ -13,7 +13,7 @@ std::vector<Lightbar> LightbarDetector::detect(const cv::Mat &bgr_img) const
     cv::Mat gray_img;
     cv::cvtColor(bgr_img, gray_img, cv::COLOR_BGR2GRAY);
 
-    // 二值化（灯条是高亮区域，取大于阈值的像素）
+    // 二值化
     cv::Mat binary_img;
     cv::threshold(gray_img, binary_img, params_.threshold, 255, cv::THRESH_BINARY);
 
@@ -21,7 +21,7 @@ std::vector<Lightbar> LightbarDetector::detect(const cv::Mat &bgr_img) const
     std::vector<std::vector<cv::Point>> contours;
     cv::findContours(binary_img, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-    // 逐个轮廓尝试构造灯条
+    // 遍历轮廓,尝试构造灯条
     for (const auto &contour : contours)
     {
         Lightbar bar;
@@ -40,7 +40,7 @@ bool LightbarDetector::tryMakeLightbar(const cv::Mat &bgr_img,
 
     const cv::RotatedRect rect = cv::minAreaRect(contour);
 
-    // 计算长宽（长边恒为 length，短边恒为 width）
+    // 计算长宽
     const float width = std::min(rect.size.width, rect.size.height);
     const float height = std::max(rect.size.width, rect.size.height);
     if (width <= 0.f)
@@ -53,7 +53,7 @@ bool LightbarDetector::tryMakeLightbar(const cv::Mat &bgr_img,
           height > params_.min_length))
         return false;
 
-    // 颜色判别：蓝通道均值更大即为蓝灯条
+    // 颜色判别
     const bool is_blue = classifyIsBlue(bgr_img, contour);
 
     out = makeLightbar(rect, is_blue, id);
@@ -63,12 +63,12 @@ bool LightbarDetector::tryMakeLightbar(const cv::Mat &bgr_img,
 bool LightbarDetector::classifyIsBlue(const cv::Mat &bgr_img,
                                       const std::vector<cv::Point> &contour) const
 {
-    // 用灯条区域内所有像素的均值比较蓝/红通道，比只看轮廓边界点更稳定
+    // 用灯条区域内所有像素的均值比较 蓝/红 通道
     cv::Mat mask = cv::Mat::zeros(bgr_img.size(), CV_8UC1);
     cv::drawContours(mask, std::vector<std::vector<cv::Point>>{contour}, 0,
                      cv::Scalar(255), cv::FILLED);
     const cv::Scalar mean = cv::mean(bgr_img, mask);
-    return mean[0] > mean[2]; // B > R → 蓝色
+    return mean[0] > mean[2]; // B > R -> 蓝色
 }
 
 Lightbar LightbarDetector::makeLightbar(const cv::RotatedRect &rect, bool is_blue, int id)
@@ -96,7 +96,7 @@ Lightbar LightbarDetector::makeLightbar(const cv::RotatedRect &rect, bool is_blu
             best = d;
         }
     }
-    // 归一化成单位方向向量；方向正负无所谓（配对判据都取绝对值）
+    // 归一化成单位方向向量
     if (best_len > 1e-6f)
         bar.axis = best / best_len;
     else
