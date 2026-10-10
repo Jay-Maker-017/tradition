@@ -1,4 +1,5 @@
 {
+    "cmake.useCMakePresets": "always",
     "cmake.generator": "Unix Makefiles",
     "cmake.options.statusBarVisibility": "visible",
     "editor.inlayHints.enabled": "on"

@@ -28,8 +28,8 @@
         },
         {
             "type": "shell",
-            "label": "C/C++: 编译 lightbar_detection（全部源文件）",
-            "command": "g++ -std=c++17 -g -fdiagnostics-color=always src/main.cpp src/lightbar.cpp src/armor.cpp src/visualize.cpp -o build/lightbar_detection -Iinclude $(pkg-config --cflags --libs opencv4)",
+            "label": "C/C++: 编译 main（全部源文件）",
+            "command": "g++ -std=c++17 -g -fdiagnostics-color=always src/main.cpp src/lightbar.cpp src/armor.cpp src/visualize.cpp -o build/main -Iinclude $(pkg-config --cflags --libs opencv4)",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -37,7 +37,7 @@
                 "$gcc"
             ],
             "group": "build",
-            "detail": "拆分多文件后需一起编译（等价于 CMake 目标 lightbar_detection）。"
+            "detail": "拆分多文件后需一起编译（等价于 CMake 目标 main）。"
         }
     ],
     "version": "2.0.0"

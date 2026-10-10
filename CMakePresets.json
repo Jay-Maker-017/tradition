@@ -1,16 +1,32 @@
 {
     "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 21,
+        "patch": 0
+    },
     "configurePresets": [
         {
             "name": "default",
-            "displayName": "默认配置",
-            "description": "Unix Makefiles，输出到 build/ 目录（兼容 CMake 3.22）",
+            "displayName": "默认配置 (Debug)",
+            "description": "Unix Makefiles，输出到 build/ 目录（兼容 CMake 3.22）；同时生成 compile_commands.json 供 clangd/IntelliSense 使用",
             "generator": "Unix Makefiles",
             "binaryDir": "${sourceDir}/build",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": {
+                    "type": "BOOL",
+                    "value": true
+                },
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
             }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "default",
+            "displayName": "构建 main (Debug)",
+            "configurePreset": "default"
         }
     ]
 }

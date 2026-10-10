@@ -11,10 +11,10 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 
 # 灯条检测程序：main + 三个算法模块（检测 / 配对 / 可视化）
-add_executable(lightbar_detection
+add_executable(main
     src/main.cpp
     src/lightbar.cpp
     src/armor.cpp
     src/visualize.cpp)
-target_include_directories(lightbar_detection PRIVATE include)
-target_link_libraries(lightbar_detection ${OpenCV_LIBS})
+target_include_directories(main PRIVATE include)
+target_link_libraries(main ${OpenCV_LIBS})
