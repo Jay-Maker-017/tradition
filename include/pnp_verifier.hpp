@@ -4,8 +4,8 @@
 
 #include <opencv2/core.hpp>
 
-// 真值接口占位：具体文件格式和标注约定确定后，再实现加载与批量统计。
-// yaw/pitch 定义与 PnPResult 相同，角度单位为度，距离及平移单位为米。
+
+// yaw/pitch 角度单位为度，距离及平移单位为米
 struct PoseGroundTruth
 {
     bool has_distance = false;

@@ -7,7 +7,8 @@
 #include <string>
 #include <vector>
 
-// 相机标定参数。长度单位为米，像素坐标以标定图像左上角为原点。
+// 相机标定参数
+// 长度单位为米，像素坐标以标定图像左上角为原点
 struct CameraParams
 {
     cv::Mat camera_matrix; // CV_64F, 3x3
@@ -16,10 +17,11 @@ struct CameraParams
     double calibration_reprojection_error = 0.0; // 标定阶段 RMS，仅供参考
 };
 
-// 读取 JSON 标定配置。读取失败时返回工程内置的相机参数并打印警告。
+// 读取 JSON 标定配置
+// 读取失败时返回工程内置的相机参数并打印警告
 CameraParams loadCameraParams(const std::string &path);
 
-// 若实际图片尺寸与标定尺寸不同，按 x/y 比例缩放焦距及主点并打印警告。
+// 若实际图片尺寸与标定尺寸不同，按 x/y 比例缩放焦距及主点并打印警告
 CameraParams adaptCameraParams(const CameraParams &calibrated, const cv::Size &image_size);
 
 struct PnPResult

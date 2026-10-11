@@ -51,7 +51,7 @@ bool parseArgs(int argc, char **argv, AppOptions &options)
 {
     if (argc > 3)
     {
-        std::cerr << "用法: " << argv[0] << " [图片或视频路径] [armor_v5|armor_v8]" << std::endl;
+        //std::cerr << "用法: " << argv[0] << " [图片或视频路径] [armor_v5|armor_v8]" << std::endl;
         return false;
     }
 
@@ -59,12 +59,12 @@ bool parseArgs(int argc, char **argv, AppOptions &options)
     options.model_key = argc >= 3 ? argv[2] : kDefaultModelKey;
     if (options.model_key != "armor_v5" && options.model_key != "armor_v8")
     {
-        std::cerr << "未知模型节点: " << options.model_key << "（可选 armor_v5 或 armor_v8）" << std::endl;
+        //std::cerr << "未知模型节点: " << options.model_key << "（可选 armor_v5 或 armor_v8）" << std::endl;
         return false;
     }
 
     std::cout << "用法: " << argv[0] << " [图片或视频路径] [armor_v5|armor_v8]" << std::endl;
-    std::cout << "默认输入: " << kDefaultVideoPath << std::endl;
+    //std::cout << "默认输入: " << kDefaultVideoPath << std::endl;
     return true;
 }
 
