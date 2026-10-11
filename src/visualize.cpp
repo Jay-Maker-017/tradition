@@ -139,8 +139,9 @@ void drawPnPResults(cv::Mat &img, const std::vector<PnPResult> &results,
         for (const cv::Point2f &point : result.reprojected_points)
             cv::circle(img, point, 5, cv::Scalar(255, 0, 255), 2, cv::LINE_AA);
 
+        // 轴长取接近小板高度（55 mm），避免 10 cm 轴遮挡板面与识别标签。
         cv::drawFrameAxes(img, camera_params.camera_matrix, camera_params.dist_coeffs,
-                          result.rvec, result.tvec, 0.1f, 2);
+                          result.rvec, result.tvec, 0.05f, 2);
 
         cv::Point2f center(0.f, 0.f);
         if (!result.reprojected_points.empty())
@@ -155,10 +156,21 @@ void drawPnPResults(cv::Mat &img, const std::vector<PnPResult> &results,
                 center += point;
             center *= 1.f / static_cast<float>(result.image_points.size());
         }
+        cv::circle(img, center, 3, cv::Scalar(255, 255, 255), cv::FILLED, cv::LINE_AA);
 
+        float bottom_y = center.y;
+        float left_x = center.x;
+        for (const cv::Point2f &point : result.image_points)
+        {
+            bottom_y = std::max(bottom_y, point.y);
+            left_x = std::min(left_x, point.x);
+        }
         const std::string distance_label = "D=" + cv::format("%.2f", result.distance_m) + " m";
-        const cv::Point label_origin(cvRound(center.x + 8.f), cvRound(center.y + 22.f));
-        cv::putText(img, distance_label, label_origin, cv::FONT_HERSHEY_SIMPLEX,
-                    0.6, cv::Scalar(255, 255, 0), 2, cv::LINE_AA);
+        const int label_x = std::clamp(cvRound(left_x), 2, std::max(2, img.cols - 150));
+        const int label_y = std::clamp(cvRound(bottom_y + 24.f), 18, std::max(18, img.rows - 4));
+        cv::putText(img, distance_label, cv::Point(label_x, label_y),
+                    cv::FONT_HERSHEY_SIMPLEX, 0.55, cv::Scalar(0, 0, 0), 4, cv::LINE_AA);
+        cv::putText(img, distance_label, cv::Point(label_x, label_y),
+                    cv::FONT_HERSHEY_SIMPLEX, 0.55, cv::Scalar(255, 255, 0), 2, cv::LINE_AA);
     }
 }

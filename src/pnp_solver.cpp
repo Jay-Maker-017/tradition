@@ -6,6 +6,7 @@
 #include <cmath>
 #include <filesystem>
 #include <iostream>
+#include <limits>
 #include <stdexcept>
 #include <utility>
 
@@ -66,7 +67,7 @@ std::vector<cv::Point3f> makePlanarArmorPoints(double width_m, double height_m)
     const float half_width = static_cast<float>(width_m / 2.0);
     const float half_height = static_cast<float>(height_m / 2.0);
     // 对象点严格匹配 armorCorners() 的 LT, RT, RB, LB 顺序。
-    // 坐标系：x 向右、y 向下、z 向前（相机坐标系约定），原点为板中心。
+    // 坐标系：x 向右、y 向下，+z = x×y，指向板内/远离相机的一侧；原点为板中心。
     return {{-half_width, -half_height, 0.0f},
             { half_width, -half_height, 0.0f},
             { half_width,  half_height, 0.0f},
@@ -192,35 +193,108 @@ PnPResult PnPSolver::solve(const Armor &armor, int armor_index) const
 
     try
     {
-        cv::Mat rvec;
-        cv::Mat tvec;
-        const bool solved = cv::solvePnP(*object_points, result.image_points,
-                                         camera_params_.camera_matrix,
-                                         camera_params_.dist_coeffs, rvec, tvec,
-                                         false, cv::SOLVEPNP_IPPE);
-        if (!solved)
+        std::vector<cv::Mat> candidate_rvecs;
+        std::vector<cv::Mat> candidate_tvecs;
+        const int candidate_count = cv::solvePnPGeneric(
+            *object_points, result.image_points, camera_params_.camera_matrix,
+            camera_params_.dist_coeffs, candidate_rvecs, candidate_tvecs,
+            false, cv::SOLVEPNP_IPPE);
+        if (candidate_count <= 0 || candidate_rvecs.size() != candidate_tvecs.size())
         {
-            result.message = "cv::solvePnP 未找到有效解";
+            result.message = "cv::solvePnPGeneric 未找到有效解";
             return result;
         }
 
-        result.rvec = matToVec3d(rvec);
-        result.tvec = matToVec3d(tvec);
+        struct Candidate
+        {
+            cv::Mat rvec;
+            cv::Mat tvec;
+            std::vector<cv::Point2f> projected;
+            double rms = std::numeric_limits<double>::infinity();
+            bool positive_depth = false;
+            bool inward_normal = false;
+        };
+        std::vector<Candidate> candidates;
+        candidates.reserve(candidate_rvecs.size());
+        for (std::size_t i = 0; i < candidate_rvecs.size(); ++i)
+        {
+            Candidate candidate;
+            candidate.rvec = candidate_rvecs[i];
+            candidate.tvec = candidate_tvecs[i];
+
+            cv::Mat rotation;
+            cv::Rodrigues(candidate.rvec, rotation);
+            const cv::Vec3d translation = matToVec3d(candidate.tvec);
+            const cv::Vec3d inward_normal(rotation.at<double>(0, 2),
+                                          rotation.at<double>(1, 2),
+                                          rotation.at<double>(2, 2));
+            candidate.inward_normal = inward_normal.dot(translation) > 0.0;
+
+            // Check every model corner is in front of the camera, not only the board origin.
+            candidate.positive_depth = true;
+            for (const cv::Point3f &point : *object_points)
+            {
+                const double z = rotation.at<double>(2, 0) * point.x +
+                                 rotation.at<double>(2, 1) * point.y +
+                                 rotation.at<double>(2, 2) * point.z + translation[2];
+                if (z <= 0.0)
+                {
+                    candidate.positive_depth = false;
+                    break;
+                }
+            }
+
+            cv::projectPoints(*object_points, candidate.rvec, candidate.tvec,
+                              camera_params_.camera_matrix, camera_params_.dist_coeffs,
+                              candidate.projected);
+            double squared_error_sum = 0.0;
+            for (std::size_t point_index = 0; point_index < candidate.projected.size(); ++point_index)
+            {
+                const cv::Point2f difference = candidate.projected[point_index] -
+                                               result.image_points[point_index];
+                squared_error_sum += difference.dot(difference);
+            }
+            candidate.rms = std::sqrt(squared_error_sum / candidate.projected.size());
+            candidates.push_back(std::move(candidate));
+        }
+
+        // 装甲板可见正面朝向相机，因此板内 +Z 应大致指向相机到板中心的反方向。
+        // 在正深度解中优先选符合该物理约定的候选，再以原始畸变模型下的 RMS 决胜。
+        const Candidate *best = nullptr;
+        for (const Candidate &candidate : candidates)
+        {
+            if (!candidate.positive_depth || !candidate.inward_normal)
+                continue;
+            if (best == nullptr || candidate.rms < best->rms)
+                best = &candidate;
+        }
+        if (best == nullptr)
+        {
+            for (const Candidate &candidate : candidates)
+            {
+                if (!candidate.positive_depth)
+                    continue;
+                if (best == nullptr || candidate.rms < best->rms)
+                    best = &candidate;
+            }
+            if (best != nullptr)
+                std::cerr << "[PnP 警告] Armor " << (armor_index + 1)
+                          << " 没有找到 +Z 指向板内的 IPPE 候选，回退到正深度且重投影误差较小的解。"
+                          << std::endl;
+        }
+        if (best == nullptr)
+        {
+            result.message = "IPPE 候选均不满足正深度条件";
+            return result;
+        }
+
+        result.rvec = matToVec3d(best->rvec);
+        result.tvec = matToVec3d(best->tvec);
         result.distance_m = cv::norm(result.tvec);
         result.yaw_deg = std::atan2(result.tvec[0], result.tvec[2]) * 180.0 / CV_PI;
         result.pitch_deg = std::atan2(result.tvec[1], result.tvec[2]) * 180.0 / CV_PI;
-
-        std::vector<cv::Point2f> projected;
-        cv::projectPoints(*object_points, rvec, tvec, camera_params_.camera_matrix,
-                          camera_params_.dist_coeffs, projected);
-        result.reprojected_points = projected;
-        double squared_error_sum = 0.0;
-        for (std::size_t i = 0; i < projected.size(); ++i)
-        {
-            const cv::Point2f difference = projected[i] - result.image_points[i];
-            squared_error_sum += difference.dot(difference);
-        }
-        result.reprojection_error_px = std::sqrt(squared_error_sum / projected.size());
+        result.reprojected_points = best->projected;
+        result.reprojection_error_px = best->rms;
         result.valid = true;
         if (result.reprojection_error_px > kReprojectionWarningThresholdPx)
         {
