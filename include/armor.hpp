@@ -16,6 +16,7 @@ struct Armor
     bool has_type = false;  // 是否成功识别出装甲板类型
     int armor_id = -1;      // 类型 ID：0哨兵 1英雄 2工程 3/4/5号步兵 6前哨站 7基地(底部) 8基地(顶部)
     int color_id = -1;      // 颜色 ID：0蓝 1红 2白 3紫
+    int size = -1;          // 装甲板尺寸：0小板 1大板 -1未知
     double nn_score = 0.;   // 网络置信度
     std::string class_name; // 类型名称
 };

@@ -84,3 +84,35 @@ void printVideoSummary(int frame_index, int total_frames,
     }
     std::cout << std::defaultfloat << std::setprecision(6) << std::endl;
 }
+
+void printPnPResults(const std::vector<Armor> &armors,
+                     const std::vector<PnPResult> &results)
+{
+    std::cout << "PnP 位姿解算结果:" << std::endl;
+    for (std::size_t i = 0; i < armors.size(); ++i)
+    {
+        const PnPResult *result = i < results.size() ? &results[i] : nullptr;
+        std::cout << "  Armor " << (i + 1) << " ("
+                  << (armors[i].size == 0 ? "小板" : armors[i].size == 1 ? "大板" : "尺寸未知")
+                  << "): ";
+        if (result == nullptr || !result->valid)
+        {
+            std::cout << (result != nullptr && !result->message.empty()
+                              ? result->message
+                              : "未生成解算结果")
+                      << std::endl;
+            continue;
+        }
+
+        std::cout << std::fixed << std::setprecision(3)
+                  << "distance=" << result->distance_m << " m"
+                  << " yaw=" << result->yaw_deg << " deg"
+                  << " pitch=" << result->pitch_deg << " deg"
+                  << " tvec=(" << result->tvec[0] << ", " << result->tvec[1]
+                  << ", " << result->tvec[2] << ") m"
+                  << " rvec=(" << result->rvec[0] << ", " << result->rvec[1]
+                  << ", " << result->rvec[2] << ") rad"
+                  << " reprojection_RMS=" << result->reprojection_error_px << " px"
+                  << std::defaultfloat << std::setprecision(6) << std::endl;
+    }
+}

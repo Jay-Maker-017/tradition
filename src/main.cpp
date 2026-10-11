@@ -1,4 +1,5 @@
 #include "pipeline.hpp"
+#include "pnp_solver.hpp"
 #include "report.hpp"
 #include "visualize.hpp"
 
@@ -28,6 +29,7 @@ const std::string kOutputVideoPath =
 // 数字神经网络模型配置
 const std::string kConfigPath =
     "/home/jay/Desktop/auto_aim_homework/tradition/configs/detect.json";
+const std::string kCameraConfigPath = "configs/camera.json";
 const std::string kModelFolder =
     "/home/jay/Desktop/auto_aim_homework/tradition/models/openvino";
 const std::string kDefaultModelKey = "armor_v8";
@@ -76,12 +78,16 @@ void printModelLoadWarning(const DetectionPipeline &pipeline)
 }
 
 int runImageMode(const cv::Mat &still_image, DetectionPipeline &pipeline,
-                 bool show_gui)
+                 const PnPSolver &pnp_solver, bool show_gui)
 {
     DetectionResult detection = pipeline.processFrame(still_image);
     printImageDetails(detection.lightbars, detection.armors, pipeline.matcher());
 
-    const cv::Mat result = makeAnnotatedFrame(still_image, detection.armors);
+    const std::vector<PnPResult> pnp_results = pnp_solver.solveAll(detection.armors);
+    printPnPResults(detection.armors, pnp_results);
+
+    cv::Mat result = makeAnnotatedFrame(still_image, detection.armors);
+    drawPnPResults(result, pnp_results, pnp_solver.cameraParams());
     if (!cv::imwrite(kOutputImagePath, result))
     {
         std::cerr << "无法保存结果图片: " << kOutputImagePath << std::endl;
@@ -211,6 +217,11 @@ int main(int argc, char **argv)
     printModelLoadWarning(pipeline);
 
     if (is_single_image)
-        return runImageMode(still_image, pipeline, show_gui);
+    {
+        const CameraParams calibrated_camera = loadCameraParams(kCameraConfigPath);
+        const CameraParams camera = adaptCameraParams(calibrated_camera, still_image.size());
+        const PnPSolver pnp_solver(camera);
+        return runImageMode(still_image, pipeline, pnp_solver, show_gui);
+    }
     return runVideoMode(capture, video_info, pipeline, show_gui);
 }

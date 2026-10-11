@@ -2,6 +2,7 @@
 
 #include "armor.hpp"
 #include "lightbar.hpp"
+#include "pnp_solver.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <vector>
@@ -22,3 +23,7 @@ cv::Mat makeAnnotatedFrame(const cv::Mat &frame,
 
 // 将画面宽度缩放到适合窗口显示的范围。
 cv::Mat resizeForDisplay(const cv::Mat &image);
+
+// 仅供图片模式调用：绘制 PnP 重投影点、相机坐标轴及距离标注。
+void drawPnPResults(cv::Mat &img, const std::vector<PnPResult> &results,
+                    const CameraParams &camera_params);

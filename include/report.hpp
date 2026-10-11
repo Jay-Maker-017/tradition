@@ -1,6 +1,7 @@
 #pragma once
 
 #include "armor.hpp"
+#include "pnp_solver.hpp"
 
 #include <vector>
 
@@ -13,3 +14,7 @@ void printImageDetails(const std::vector<Lightbar> &lightbars,
 void printVideoSummary(int frame_index, int total_frames,
                        const std::vector<Lightbar> &lightbars,
                        const std::vector<Armor> &armors);
+
+// 输出单张图片中每块装甲板的 PnP 位姿与重投影误差。
+void printPnPResults(const std::vector<Armor> &armors,
+                     const std::vector<PnPResult> &results);

@@ -9,6 +9,7 @@ namespace
 {
 // 是否绘制灯条红蓝矩形框；绿色中心点不受此开关影响。
 constexpr bool kDrawLightbarRects = false;
+constexpr bool kDrawPnPResults = true;
 } // namespace
 
 void drawLightbars(cv::Mat &img, const std::vector<Lightbar> &lightbars,
@@ -122,4 +123,42 @@ cv::Mat resizeForDisplay(const cv::Mat &image)
         cv::resize(image, display, cv::Size(), scale, scale);
     }
     return display;
+}
+
+void drawPnPResults(cv::Mat &img, const std::vector<PnPResult> &results,
+                    const CameraParams &camera_params)
+{
+    if (!kDrawPnPResults)
+        return;
+
+    for (const PnPResult &result : results)
+    {
+        if (!result.valid)
+            continue;
+
+        for (const cv::Point2f &point : result.reprojected_points)
+            cv::circle(img, point, 5, cv::Scalar(255, 0, 255), 2, cv::LINE_AA);
+
+        cv::drawFrameAxes(img, camera_params.camera_matrix, camera_params.dist_coeffs,
+                          result.rvec, result.tvec, 0.1f, 2);
+
+        cv::Point2f center(0.f, 0.f);
+        if (!result.reprojected_points.empty())
+        {
+            for (const cv::Point2f &point : result.reprojected_points)
+                center += point;
+            center *= 1.f / static_cast<float>(result.reprojected_points.size());
+        }
+        else if (!result.image_points.empty())
+        {
+            for (const cv::Point2f &point : result.image_points)
+                center += point;
+            center *= 1.f / static_cast<float>(result.image_points.size());
+        }
+
+        const std::string distance_label = "D=" + cv::format("%.2f", result.distance_m) + " m";
+        const cv::Point label_origin(cvRound(center.x + 8.f), cvRound(center.y + 22.f));
+        cv::putText(img, distance_label, label_origin, cv::FONT_HERSHEY_SIMPLEX,
+                    0.6, cv::Scalar(255, 255, 0), 2, cv::LINE_AA);
+    }
 }

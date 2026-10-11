@@ -72,6 +72,7 @@ void DigitRecognizer::recognize(const cv::Mat &bgr_img, std::vector<Armor> &armo
             armor.has_type = true;
             armor.armor_id = r.armor_id;
             armor.color_id = r.color_id;
+            armor.size = r.size;
             armor.nn_score = r.score;
             armor.class_name = r.class_name;
         }
