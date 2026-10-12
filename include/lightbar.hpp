@@ -22,7 +22,7 @@ struct LightbarParams
 {
     double threshold = 200.0;      // 二值化阈值
     double min_ratio = 3.0;        // 最小长宽比
-    double max_ratio = 25.0;        // 最大长宽比
+    double max_ratio = 50.0;        // 最大长宽比
     double min_length = 5.0;       // 灯条长边最小像素数
     int min_contour_size = 12;     // 轮廓点数下限
 };

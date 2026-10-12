@@ -1,12 +1,14 @@
 #include "pipeline.hpp"
 #include "pnp_solver.hpp"
 #include "report.hpp"
+#include "test_image_ground_truth.hpp"
 #include "visualize.hpp"
 
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <limits>
@@ -78,7 +80,9 @@ void printModelLoadWarning(const DetectionPipeline &pipeline)
 }
 
 int runImageMode(const cv::Mat &still_image, DetectionPipeline &pipeline,
-                 const PnPSolver &pnp_solver, bool show_gui)
+                 const PnPSolver &pnp_solver, const CameraParams &camera_params,
+                 const std::string &input_path,
+                 const TestImageGroundTruth *ground_truth, bool show_gui)
 {
     DetectionResult detection = pipeline.processFrame(still_image);
     printImageDetails(detection.lightbars, detection.armors, pipeline.matcher());
@@ -86,14 +90,30 @@ int runImageMode(const cv::Mat &still_image, DetectionPipeline &pipeline,
     const std::vector<PnPResult> pnp_results = pnp_solver.solveAll(detection.armors);
     printPnPResults(detection.armors, pnp_results);
 
+    std::vector<ProjectedTruthArmor> projected_truth;
+    if (ground_truth != nullptr)
+    {
+        projected_truth = projectTestImageGroundTruth(*ground_truth, camera_params);
+        printTestImageCalibration(*ground_truth, projected_truth, camera_params, still_image.size());
+        printTestImagePoseErrors(projected_truth, pnp_results);
+    }
+
     cv::Mat result = makeAnnotatedFrame(still_image, detection.armors);
     drawPnPResults(result, pnp_results, pnp_solver.cameraParams());
-    if (!cv::imwrite(kOutputImagePath, result))
+    std::string output_image_path = kOutputImagePath;
+    if (ground_truth != nullptr)
     {
-        std::cerr << "无法保存结果图片: " << kOutputImagePath << std::endl;
+        const std::filesystem::path input(input_path);
+        output_image_path = (input.parent_path() /
+                             (input.stem().string() + "_calibration.jpg")).string();
+        drawTestImageGroundTruth(result, projected_truth);
+    }
+    if (!cv::imwrite(output_image_path, result))
+    {
+        std::cerr << "无法保存结果图片: " << output_image_path << std::endl;
         return 1;
     }
-    std::cout << "结果图片已保存: " << kOutputImagePath << std::endl;
+    std::cout << "结果图片已保存: " << output_image_path << std::endl;
     if (show_gui)
     {
         cv::imshow("Tradition Armor Detection", result);
@@ -221,7 +241,9 @@ int main(int argc, char **argv)
         const CameraParams calibrated_camera = loadCameraParams(kCameraConfigPath);
         const CameraParams camera = adaptCameraParams(calibrated_camera, still_image.size());
         const PnPSolver pnp_solver(camera);
-        return runImageMode(still_image, pipeline, pnp_solver, show_gui);
+        const TestImageGroundTruth *ground_truth = findTestImageGroundTruth(options.input_path);
+        return runImageMode(still_image, pipeline, pnp_solver, camera, options.input_path,
+                            ground_truth, show_gui);
     }
     return runVideoMode(capture, video_info, pipeline, show_gui);
 }

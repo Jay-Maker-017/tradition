@@ -42,7 +42,8 @@ add_executable(main
     src/pipeline.cpp
     # PnP 位姿解算（仅照片模式）与真值比较接口
     src/pnp_solver.cpp
-    src/pnp_verifier.cpp)
+    src/pnp_verifier.cpp
+    src/test_image_ground_truth.cpp)
 target_include_directories(main PRIVATE include)
 # NNdeployment 公开接口需要 C++20（GCC 11 及以上支持）
 target_compile_features(main PRIVATE cxx_std_20)
