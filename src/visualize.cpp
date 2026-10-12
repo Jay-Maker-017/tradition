@@ -1,7 +1,10 @@
 #include "visualize.hpp"
 
+#include <opencv2/calib3d.hpp>
+
 #include <algorithm>
 #include <string>
+#include <vector>
 
 // 可视化模块
 
@@ -136,12 +139,31 @@ void drawPnPResults(cv::Mat &img, const std::vector<PnPResult> &results,
         if (!result.valid)
             continue;
 
-        for (const cv::Point2f &point : result.reprojected_points)
-            cv::circle(img, point, 5, cv::Scalar(255, 0, 255), 2, cv::LINE_AA);
-
-        // 轴长取接近小板高度（55 mm），避免 10 cm 轴遮挡板面与识别标签。
-        cv::drawFrameAxes(img, camera_params.camera_matrix, camera_params.dist_coeffs,
-                          result.rvec, result.tvec, 0.05f, 2);
+        // 模型坐标 x 向右、y 向下、+z 指向板内；使用 -y、-z 分别将绿轴画向上、蓝轴画向板外。
+        constexpr float axis_length = 0.05f;
+        const std::vector<cv::Point3f> axis_points{
+            {0.0f, 0.0f, 0.0f},
+            {axis_length, 0.0f, 0.0f},
+            {0.0f, -axis_length, 0.0f},
+            {0.0f, 0.0f, -axis_length}};
+        std::vector<cv::Point2f> projected_axes;
+        cv::projectPoints(axis_points, result.rvec, result.tvec,
+                          camera_params.camera_matrix, camera_params.dist_coeffs,
+                          projected_axes);
+        if (projected_axes.size() == axis_points.size())
+        {
+            constexpr int axis_thickness = 2;
+            constexpr double arrow_tip_length = 0.2;
+            cv::arrowedLine(img, projected_axes[0], projected_axes[1],
+                            cv::Scalar(0, 0, 255), axis_thickness, cv::LINE_AA,
+                            0, arrow_tip_length); // X: red
+            cv::arrowedLine(img, projected_axes[0], projected_axes[2],
+                            cv::Scalar(0, 255, 0), axis_thickness, cv::LINE_AA,
+                            0, arrow_tip_length); // upward -Y: green
+            cv::arrowedLine(img, projected_axes[0], projected_axes[3],
+                            cv::Scalar(255, 0, 0), axis_thickness, cv::LINE_AA,
+                            0, arrow_tip_length); // outward -Z: blue
+        }
 
         cv::Point2f center(0.f, 0.f);
         if (!result.reprojected_points.empty())

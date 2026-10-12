@@ -16,14 +16,13 @@ CameraParams makeDefaultCameraParams()
 {
     CameraParams params;
     params.camera_matrix = (cv::Mat_<double>(3, 3) <<
-        2362.2795952460974, 0.0, 679.17513921636282,
-        0.0, 2336.1916035376717, 529.06858905837635,
+        869.1168824543144, 0.0, 480.0,
+        0.0, 869.1168824543144, 360.0,
         0.0, 0.0, 1.0);
     params.dist_coeffs = (cv::Mat_<double>(1, 5) <<
-        -0.098561592108101559, 0.11173066531932681,
-        -0.0038352943354436304, -0.0020421443354436304, 0.0);
-    params.image_size = cv::Size(1440, 1080);
-    params.calibration_reprojection_error = 0.1448;
+        0.0, 0.0, 0.0, 0.0, 0.0);
+    params.image_size = cv::Size(960, 720);
+    params.calibration_reprojection_error = 0.0;
     return params;
 }
 
