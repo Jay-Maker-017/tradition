@@ -20,11 +20,11 @@ struct Lightbar
 // 灯条检测参数
 struct LightbarParams
 {
-    double threshold = 200.0;      // 二值化阈值
+    double threshold = 35.0;        // 暗场下保留低亮度的自发光灯条
     double min_ratio = 3.0;        // 最小长宽比
     double max_ratio = 50.0;        // 最大长宽比
     double min_length = 5.0;       // 灯条长边最小像素数
-    int min_contour_size = 12;     // 轮廓点数下限
+    int min_contour_size = 4;      // CHAIN_APPROX_SIMPLE 会压缩矩形轮廓至约 4 个点
 };
 
 // 灯条检测器

@@ -88,23 +88,22 @@ void printVideoSummary(int frame_index, int total_frames,
 void printPnPResults(const std::vector<Armor> &armors,
                      const std::vector<PnPResult> &results)
 {
-    std::cout << "PnP 位姿解算结果:" << std::endl;
+    bool printed_header = false;
     for (std::size_t i = 0; i < armors.size(); ++i)
     {
         const PnPResult *result = i < results.size() ? &results[i] : nullptr;
+        if (result == nullptr || !result->valid)
+            continue;
+
+        if (!printed_header)
+        {
+            std::cout << "PnP 位姿解算结果:" << std::endl;
+            printed_header = true;
+        }
         std::cout << "  Armor " << (i + 1) << " ("
                   << (armors[i].size == 0 ? "小板" : armors[i].size == 1 ? "大板" : "尺寸未知")
-                  << "): ";
-        if (result == nullptr || !result->valid)
-        {
-            std::cout << (result != nullptr && !result->message.empty()
-                              ? result->message
-                              : "未生成解算结果")
-                      << std::endl;
-            continue;
-        }
-
-        std::cout << std::fixed << std::setprecision(3)
+                  << "): "
+                  << std::fixed << std::setprecision(3)
                   << "distance=" << result->distance_m << " m"
                   << " yaw=" << result->yaw_deg << " deg"
                   << " pitch=" << result->pitch_deg << " deg"

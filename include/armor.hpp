@@ -25,9 +25,9 @@ struct Armor
 struct ArmorParams
 {
     float max_len_diff_ratio = 0.35f; // 两灯条长度接近度 (长度差/较长者 的允许上限)
-    float min_dist_ratio = 0.8f;      // 中心距/平均长度 的下限
-    float max_dist_ratio = 4.5f;      // 中心距/平均长度 的上限
-    float ideal_dist_ratio = 2.6f;    // 理想间距比（实测一般 2.6~2.8 取值，用于打分，越接近越优）
+    float min_dist_ratio = 1.2f;      // 排除距离过近、可能属于同一灯条的轮廓
+    float max_dist_ratio = 3.5f;      // 测试图中有效灯条间距比均小于 2.3
+    float ideal_dist_ratio = 2.0f;    // 暗场测试图的有效配对间距比约为 1.8~2.3
     float max_parallel_err = 0.2f;    // 平行误差上限（对应两长轴夹角约 11.5°）
     float max_perp_err = 0.35f;       // 垂直误差上限（对应中心连线与长轴夹角约 20°）
     // 得分项权重
