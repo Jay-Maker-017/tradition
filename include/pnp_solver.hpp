@@ -11,10 +11,10 @@
 // 长度单位为米，像素坐标以标定图像左上角为原点
 struct CameraParams
 {
-    cv::Mat camera_matrix; // CV_64F, 3x3
-    cv::Mat dist_coeffs;   // CV_64F, 1xN
+    cv::Mat camera_matrix; 
+    cv::Mat dist_coeffs;   
     cv::Size image_size;
-    double calibration_reprojection_error = 0.0; // 标定阶段 RMS，仅供参考
+    double calibration_reprojection_error = 0.0; 
 };
 
 // 读取 JSON 标定配置
