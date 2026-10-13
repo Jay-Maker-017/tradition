@@ -63,7 +63,7 @@ bool parseArgs(int argc, char **argv, AppOptions &options)
         return false;
     }
 
-    std::cout << "用法: " << argv[0] << " [图片或视频路径] [armor_v5|armor_v8]" << std::endl;
+    //std::cout << "用法: " << argv[0] << " [图片或视频路径] [armor_v5|armor_v8]" << std::endl;
     //std::cout << "默认输入: " << kDefaultVideoPath << std::endl;
     return true;
 }

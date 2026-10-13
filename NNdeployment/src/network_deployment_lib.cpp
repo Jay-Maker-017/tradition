@@ -385,7 +385,10 @@ YOLOModel::YOLOModel(const ModelConfig &model_config, const DebugConfig &debug_c
     }
 
     // 调用namespace中的函数打印使用的模型信息，这部分不需要debug开启也打印
-    printCurrentModelInfo(m_model_config);
+    // 按要求注释掉启动打印（“兵种：… 推理模式：… 部署方式：…”横幅及
+    // “注：标准情况下vX步兵应该使用openvino部署，async推理”等组合提示）；
+    // 需要恢复打印时取消下面一行的注释即可。
+    // printCurrentModelInfo(m_model_config);
 }
 
 //  完整的网络识别框架——主要流程：传入图片->预处理->推理->后处理->输出结果

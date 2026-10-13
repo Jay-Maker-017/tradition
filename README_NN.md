@@ -97,7 +97,7 @@ cmake --build build -j$(nproc)
 
 | 文件 | 说明 |
 | --- | --- |
-| `NNdeployment/` | 部署库（复制自 26_Detection_Models-main，与上游完全一致，勿修改） |
+| `NNdeployment/` | 部署库（复制自 26_Detection_Models-main，与上游一致；仅注释掉启动横幅打印） |
 | `models/openvino/` | Infantry-v5n / v8n 模型（复制自 26_Detection_Models-main） |
 | `configs/detect.json` | 模型配置：xml 路径、推理模式、设备、置信度阈值 |
 | `include/digit_recognizer.hpp` | 数字识别模块接口（DigitParams / DigitRecognizer） |
@@ -119,8 +119,10 @@ cmake --build build -j$(nproc)
 - **置信度阈值**（`configs/detect.json` 中 `score_threshold`）：默认 `0.5`。
 - **推理模式**（`configs/detect.json` 中 `infer_mode`）：
   单图离线处理用 `sync` 最简单；连续帧场景可改 `async`（流水线推理，需注意结果延迟）。
-  > 若终端出现 `注：标准情况下v8步兵应该使用openvino部署，async推理`，这是部署库对 `sync`
-  > 模式的常规提示，离线单图处理用 `sync` 是无误的（同步返回结果，不会丢帧）。
+  > 部署库对 `sync` 模式的提示（`注：标准情况下v8步兵应该使用openvino部署，async推理`）
+  > 已与启动横幅（`兵种：… 推理模式：… 部署方式：…`）一起在
+  > `NNdeployment/src/network_deployment_lib.cpp` 构造函数末尾注释关闭；
+  > 离线单图处理用 `sync` 是无误的（同步返回结果，不会丢帧）。
 - **换模型**：把新模型的 `.xml` / `.bin` 放入 `models/openvino/`，
   并修改 `configs/detect.json` 中对应节点的 `xml` 相对路径即可，无需重新编译。
 
