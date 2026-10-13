@@ -17,13 +17,13 @@ void drawLightbars(cv::Mat &img, const std::vector<Lightbar> &lightbars,
 // 绘制已配对的装甲板
 void drawArmors(cv::Mat &img, const std::vector<Armor> &armors);
 
-// 生成带灯条和装甲板标注的画面。
+// 生成带灯条和装甲板标注的画面
 cv::Mat makeAnnotatedFrame(const cv::Mat &frame,
                            const std::vector<Armor> &armors);
 
-// 将画面宽度缩放到适合窗口显示的范围。
+// 将画面宽度缩放到适合窗口显示的范围
 cv::Mat resizeForDisplay(const cv::Mat &image);
 
-// 仅供图片模式调用：绘制 PnP 重投影点、相机坐标轴及距离标注。
+// 仅供图片模式调用：绘制 PnP 重投影点、相机坐标轴及距离标注
 void drawPnPResults(cv::Mat &img, const std::vector<PnPResult> &results,
                     const CameraParams &camera_params);
