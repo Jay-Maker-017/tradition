@@ -108,11 +108,13 @@ void printPnPResults(const std::vector<Armor> &armors,
                   << "distance=" << result->distance_m << " m"
         //          << " yaw=" << result->yaw_deg << " deg"
         //          << " pitch=" << result->pitch_deg << " deg"
-        //          << " tvec=(" << result->tvec[0] << ", " << result->tvec[1]
-        //          << ", " << result->tvec[2] << ") m"
         //          << " rvec=(" << result->rvec[0] << ", " << result->rvec[1]
         //          << ", " << result->rvec[2] << ") rad"
                   << " reprojection_RMS=" << result->reprojection_error_px << " px"
                   << std::defaultfloat << std::setprecision(6) << std::endl;
+        // 相机坐标系下装甲板中心的三维坐标（单位：米）
+        std::cout << "    相机坐标系下装甲板中心: (" << std::fixed << std::setprecision(3)
+                  << result->tvec[0] << ", " << result->tvec[1] << ", " << result->tvec[2]
+                  << ") m" << std::defaultfloat << std::setprecision(6) << std::endl;
     }
 }

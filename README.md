@@ -1,15 +1,13 @@
 # tradition：传统方案 + 数字神经网络装甲板类型识别
 
-在原传统方案（灯条检测 → 装甲板配对 → 四角点 + 中心）的基础上，迁移
-"26_Detection_Models-main" 的 **NNdeployment 部署库**与 **Infantry 装甲板模型**，
-用数字神经网络识别装甲板的类型
+在原传统方案的基础上，迁移深大开源工程 的 **NNdeployment 部署库**与 **Infantry 装甲板模型**，用数字神经网络识别装甲板的类型
 
 ## 1. 工作流程
 
 ```
 图片/视频帧
    │
-   |-> [传统方案] 灯条检测 -> 装甲板配对（四角点 + 中心）
+   |-> [传统方案] 灯条检测 -> 装甲板配对
    │
    |-> [神经网络] ArmorModel 整帧推理 -> 网络装甲板（角点 + 类型/颜色/尺寸）
    │
@@ -17,7 +15,7 @@
 
 ```
 
-思路参考 "26_Detection_Models-main"(其实就是群里那个，我嫌名字太长，就把它改了),
+思路参考 "26_Detection_Models-main"(深大开源工程),
 一句话说就是"**传统方案负责定位，神经网络负责分类**":
 用 "NNdeployment" 的 "ArmorModel" 对整帧图像做一次推理，
 再与传统方案检测出的装甲板按中心距匹配，
@@ -94,14 +92,14 @@ cmake --build build -j$(nproc)
 
 | 文件 | 说明 |
 | --- | --- |
-| `NNdeployment/` | 部署库（完整复制自 "26_Detection_Models-main",仅注释掉启动横幅打印） |
-| `models/openvino/` | Infantry-v5n / v8n 模型（完整复制自 "26_Detection_Models-main"） |
-| `configs/detect.json` | 模型配置 |
-| `include/digit_recognizer.hpp` | 数字识别模块接口 |
-| `src/digit_recognizer.cpp` | 整帧推理 + 中心距匹配实现 |
-| `src/visualize.cpp` | 装甲板类型与置信度 |
-| `src/main.cpp` | 图片/视频智能切换；逐帧执行检测、配对、数字识别、打印与可视化 |
-| `lightbar_result.avi` | 视频检测结果 |
+| NNdeployment/`| 部署库（完整复制自 深大开源工程,仅注释掉启动横幅打印） |
+| models/openvino/ | Infantry-v5n / v8n 模型（完整复制自 深大开源工程） |
+| configs/detect.json | 模型配置 |
+| include/digit_recognizer.hpp | 数字识别模块接口 |
+| src/digit_recognizer.cpp | 整帧推理 + 中心距匹配实现 |
+| src/visualize.cpp | 装甲板类型与置信度 |
+| src/main.cpp | 图片/视频智能切换；逐帧执行检测、配对、数字识别、打印与可视化 |
+| lightbar_result.avi | 视频检测结果 |
 
 ## 6. 常见参数调整
 
