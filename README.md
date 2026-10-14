@@ -92,7 +92,7 @@ cmake --build build -j$(nproc)
 
 | 文件 | 说明 |
 | --- | --- |
-| NNdeployment/`| 部署库（完整复制自 深大开源工程,仅注释掉启动横幅打印） |
+| NNdeployment/ | 部署库（完整复制自 深大开源工程,仅注释掉启动横幅打印） |
 | models/openvino/ | Infantry-v5n / v8n 模型（完整复制自 深大开源工程） |
 | configs/detect.json | 模型配置 |
 | include/digit_recognizer.hpp | 数字识别模块接口 |
