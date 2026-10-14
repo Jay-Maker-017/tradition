@@ -1,8 +1,8 @@
 # tradition：传统方案 + 数字神经网络装甲板类型识别
 
 在原传统方案（灯条检测 → 装甲板配对 → 四角点 + 中心）的基础上，迁移
-`26_Detection_Models-main` 的 **NNdeployment 部署库**与 **Infantry 装甲板模型**（OpenVINO 后端），
-用数字神经网络识别每块装甲板的类型。
+"26_Detection_Models-main" 的 **NNdeployment 部署库**与 **Infantry 装甲板模型**，
+用数字神经网络识别装甲板的类型
 
 ## 1. 工作流程
 
@@ -101,7 +101,7 @@ cmake --build build -j$(nproc)
 | `src/digit_recognizer.cpp` | 整帧推理 + 中心距匹配实现 |
 | `src/visualize.cpp` | 装甲板类型与置信度 |
 | `src/main.cpp` | 图片/视频智能切换；逐帧执行检测、配对、数字识别、打印与可视化 |
-| `lightbar_result.avi` | 视频检测结果（运行视频输入后生成） |
+| `lightbar_result.avi` | 视频检测结果 |
 
 ## 6. 常见参数调整
 
