@@ -1,0 +1,30 @@
+# ===== 构建输出目录 =====
+build/
+build-*/
+cmake-build-*/
+install/
+
+# CMake 在源码目录内生成的产物（防止误在源码树里原地构建）
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+
+# 编译产物
+*.o
+*.a
+*.so
+*.so.*
+
+# ===== 程序运行输出 =====
+lightbar_result.jpg
+lightbar_result.avi
+
+# ===== 工具缓存（clangd 索引等）=====
+.cache/
+
+# ===== 编辑器 / 系统文件 =====
+.DS_Store
+Thumbs.db
+*.swp
+*~
